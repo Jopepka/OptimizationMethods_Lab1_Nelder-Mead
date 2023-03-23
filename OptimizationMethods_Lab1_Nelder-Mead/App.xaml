@@ -1,0 +1,9 @@
+﻿<Application x:Class="OptimizationMethods_Lab1_Nelder_Mead.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:OptimizationMethods_Lab1_Nelder_Mead"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+         
+    </Application.Resources>
+</Application>
