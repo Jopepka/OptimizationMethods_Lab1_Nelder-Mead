@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Vector\Vector\Vector.csproj" />
     <ProjectReference Include="..\Nelder-Mead\Nelder-Mead.csproj" />
+    <ProjectReference Include="..\Vector\Vector.csproj" />
   </ItemGroup>
 
 </Project>
