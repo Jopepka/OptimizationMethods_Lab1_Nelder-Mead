@@ -1,11 +1,7 @@
 using System;
-using System.Numerics;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Vector;
-using System.IO.Compression;
-using System.DirectoryServices.ActiveDirectory;
-using System.Runtime;
 
 namespace Nelder_Mead
 {
@@ -13,7 +9,7 @@ namespace Nelder_Mead
     {
         public class FuncValue
         {
-            public FuncValue(double Y, VectorM X, Func? func = null)
+            public FuncValue(double Y, VectorM X, CalculationFunction? func = null)
             {
                 this.Y = Y;
                 this.X = X;
@@ -21,56 +17,91 @@ namespace Nelder_Mead
                 this.func = func;
             }
 
-            public FuncValue(VectorM X, Func func):this(func(X), X, func) { }
+            public FuncValue(VectorM X, CalculationFunction func) : this(func(X), X, func) { }
 
-            public double Y {get; }
-            public VectorM X { get;}
+            public double Y { get; }
+            public VectorM X { get; }
 
-            Func? func { get; }
+            CalculationFunction? func { get; }
         }
-
-        public double Alfa { get;}
-        public double Betta { get;}
-        public double Gamma { get;}
-        public int? Dim { get;}
-        public Func Function { get; private set;}
-
+        //Параметры непосредственно влияющие на алгоритм
+        public double Alfa { get; }
+        public double Betta { get; }
+        public double Gamma { get; }
         public int MaxSteps { get; }
-        public double? Dispersion { get; }
-        public List<VectorM>? StartSimplex { get; private set;}
-        public int Steps{get; private set;}
+        public double? MinDispersion { get; }
+        public List<VectorM>? StartSimplex { get; private set; }
 
+        //Функция рассчета критерия
+        public CalculationFunction Function { get; private set; }
 
-        public Nelder_Mead_algorithm(double alfa, double betta, double gamma, 
-            int dimension, Func func, int maxSteps = 1000,
-            List<VectorM>? simplex = null, double ? dispersion = null)
+        //Внутренние параметры
+        public int Steps { get; private set; }
+        public double Dispersion { get; private set; }
+        public int Dimention { get; }
+
+        public Nelder_Mead_algorithm(double alfa, double betta, double gamma,
+            int maxSteps = 100, double? dispersion = null)
         {
-            this.Alfa = alfa;
-            this.Betta = betta;
-            this.Gamma = gamma;
-            Dim = dimension;
-            Function = func;
+            Alfa = alfa;
+            Betta = betta;
+            Gamma = gamma;
 
             MaxSteps = maxSteps;
-            Dispersion = dispersion;
-            StartSimplex = simplex;
-
-
+            MinDispersion = dispersion;
         }
-        public VectorM Run()
+
+        public void Fit(CalculationFunction calculationFunction, List<VectorM> startSimplex)
         {
-            List<VectorM> vectors;
+            Function = calculationFunction;
+            StartSimplex = startSimplex;
+        }
+
+        public List<VectorM> СreatureSimplex(int dimension, double sizeSimplex = 1, VectorM? startVector = null)
+        {
+            VectorM? firstVectorSimplex = null;
+            if (startVector is null)
+            {
+                firstVectorSimplex = new VectorM(dimension);
+            }
+            else
+            {
+                if (startVector.Size == dimension)
+                {
+                    firstVectorSimplex = startVector;
+                }
+                else
+                {
+                    throw new ArgumentException($"dimension {dimension} and size startVector {startVector.Size} must be equal");
+                }
+            }
+            List<VectorM> baseVectors = new List<VectorM>();
+            for (int i = 0; i < dimension; i++)
+            {
+                VectorM baseVector = new VectorM(dimension);
+                baseVector[i] += 1;
+                baseVectors.Add(baseVector);
+            }
+
+            List<VectorM> simplex = new List<VectorM> { firstVectorSimplex };
+            for (int i = 0; i < dimension; i++)
+            {
+                VectorM newVector = firstVectorSimplex + baseVectors[i] * sizeSimplex;
+                simplex.Add(newVector);
+            }
+            return simplex;
+        }
+
+        public VectorM? Run()
+        {
             if (StartSimplex is null)
             {
-                vectors = CriateRandomPoints();
-                StartSimplex = vectors;
+                return null;
             }
-            else 
-                vectors = StartSimplex;
-            
+
             List<FuncValue> funcValues = new List<FuncValue>() { };
 
-            foreach (VectorM vector in vectors)
+            foreach (VectorM vector in StartSimplex)
             {
                 funcValues.Add(new FuncValue(vector, Function));
             }
@@ -81,15 +112,15 @@ namespace Nelder_Mead
                 steps++;
 
                 funcValues.Sort((left, right) => left.Y.CompareTo(right.Y));
-                FuncValue best = funcValues[0],
-                    good = funcValues[funcValues.Count-2],
+
+                FuncValue
+                    best = funcValues[0],
+                    good = funcValues[funcValues.Count - 2],
                     worst = funcValues[funcValues.Count - 1];
 
-                VectorM x_centreG = CentreGravity(funcValues.GetRange(0, funcValues.Count - 1).Select(v => v.X).ToList());
-                FuncValue centreG = new FuncValue(x_centreG, Function);
+                FuncValue centreG = CentreGravity(funcValues.GetRange(0, funcValues.Count - 1).Select(v => v.X).ToList());
 
                 FuncValue reflected = Reflection(worst, centreG);
-                /////
 
                 int goStep = 6;
                 VectorM eVect;
@@ -122,154 +153,101 @@ namespace Nelder_Mead
                     goStep = 6;
                 }
                 else if (worst.Y < reflected.Y)
-                {
                     goStep = 6;
-                }
 
-                funcValues[funcValues.Count-1] = worst;
+                funcValues[funcValues.Count - 1] = worst;
 
                 if (goStep == 6)
                 {
                     FuncValue s = Compression(funcValues.Last(), centreG);
-
                     if (s.Y < funcValues.Last().Y)
-                    {
                         funcValues[funcValues.Count() - 1] = s;
-                    }
                     else if (s.Y > funcValues.Last().Y)
-                    {
                         funcValues = GlobalCompression(funcValues);
-                    }
                 }
 
-                if (ProximityAssessment(funcValues) < Dispersion || steps > MaxSteps)
-                {
+                if ((Dispersion = ProximityAssessment(funcValues)) < MinDispersion || steps >= MaxSteps)
                     break;
-                }
             }
+
             Steps = steps;
             return funcValues[0].X;
         }
-        public VectorM NewRun()
-        {
-            int steps = 0;
-            List<VectorM> vectors;
 
-            //Если начальный симплекс не задан, то создаем
+        public VectorM? RunV2()
+        {
             if (StartSimplex is null)
-            {
-                vectors = CriateRandomPoints();
-                StartSimplex = vectors;
-            }
-            else
-                vectors = StartSimplex;
+                return null;
 
             List<FuncValue> funcValues = new List<FuncValue>() { };
-            foreach (VectorM vector in vectors)
+
+            foreach (VectorM vector in StartSimplex)
             {
                 funcValues.Add(new FuncValue(vector, Function));
             }
 
+            int steps = 0;
             while (true)
             {
                 steps++;
 
-                //(1) Сортируем точки по их значениям
                 funcValues.Sort((left, right) => left.Y.CompareTo(right.Y));
 
-                //Выбираем точки из симплекса
                 FuncValue best = funcValues[0],
                     good = funcValues[funcValues.Count - 2],
                     worst = funcValues[funcValues.Count - 1];
 
-                //(2) Находим центр тяжести
-                VectorM centreG_vect = CentreGravity(funcValues.GetRange(0, funcValues.Count - 1).Select(v => v.X).ToList());
-                FuncValue centreG = new FuncValue(centreG_vect, Function);
+                FuncValue centreG = CentreGravity(funcValues.GetRange(0, funcValues.Count - 1).Select(v => v.X).ToList());
 
-                //(3) Находим отраженную точку
                 FuncValue reflected = Reflection(worst, centreG);
-                //Если отраженная точка находится между лучшей и хорошей
                 if (best.Y <= reflected.Y && reflected.Y < good.Y)
-                {
-                    funcValues[funcValues.Count-1] = reflected;
-                }
-                //(4) Если отраженная точка лучшая, то 
+                    funcValues[funcValues.Count - 1] = reflected;
                 else if (reflected.Y < best.Y)
                 {
-                    //Попробуем растянуть
                     FuncValue expansion = Expansion(reflected, centreG);
                     if (expansion.Y < reflected.Y)
-                    {
                         funcValues[funcValues.Count - 1] = expansion;
-                    }
                     else
-                    {
                         funcValues[funcValues.Count - 1] = reflected;
-                    }
                 }
-                //(5) Отраженная точка точно хуже хорошей
                 else
                 {
-                    //Если отраженная лучше худшей, то попробуем сжать наружу
                     if (reflected.Y < worst.Y)
                     {
                         FuncValue compress = Compression(reflected, centreG);
                         if (compress.Y < reflected.Y)
-                        {
                             funcValues[funcValues.Count - 1] = compress;
-                        }
-                        //(6) Если не получилось, то глобальное сжатие
                         else
-                        {
                             funcValues = GlobalCompression(funcValues);
-                        }
                     }
-                    // Если отраженная хуже худшей, то попробуем сжать внутрь
-                    else if(reflected.Y >= worst.Y)
+                    else if (reflected.Y >= worst.Y)
                     {
                         FuncValue compress = Compression(worst, centreG);
                         if (compress.Y < worst.Y)
-                        {
-                            funcValues[funcValues.Count-1] = compress;
-                        }
-                        //(6) Если не получилось, то глобальное сжатие
+                            funcValues[funcValues.Count - 1] = compress;
                         else
-                        {
                             funcValues = GlobalCompression(funcValues);
-                        }
                     }
                 }
 
-                //Проверяем на удовлетворение точности
-                if (ProximityAssessment(funcValues) < Dispersion || steps > MaxSteps)
-                {
+                if ((Dispersion = ProximityAssessment(funcValues)) < MinDispersion || steps >= MaxSteps)
                     break;
-                }
-            } //конец while(true)
+            } // while(true) end
             Steps = steps;
             return funcValues[0].X;
         }
 
-        private List<VectorM> CriateRandomPoints()
-        {
-            Random rd = new Random();
-            return null;
-        }
-
-        private VectorM CentreGravity(List<VectorM> vectors)
+        private FuncValue CentreGravity(List<VectorM> vectors)
         {
             VectorM sumVect = new VectorM(vectors[0].Count);
             foreach (VectorM vector in vectors)
-            {
                 sumVect += vector;
-            }
-
-            return sumVect/vectors.Count;
+            return new FuncValue(sumVect / vectors.Count, Function);
         }
 
         private FuncValue Reflection(FuncValue worst, FuncValue centreG)
         {
-            VectorM reflectedVector = (1+Alfa)*centreG.X - Alfa*worst.X;
+            VectorM reflectedVector = (1 + Alfa) * centreG.X - Alfa * worst.X;
             FuncValue reflected = new FuncValue(reflectedVector, Function);
             return reflected;
         }
@@ -283,15 +261,17 @@ namespace Nelder_Mead
 
         private FuncValue Compression(FuncValue worst, FuncValue centreG)
         {
-            VectorM s = Betta*worst.X + (1-Betta)*centreG.X;
+            VectorM s = Betta * worst.X + (1 - Betta) * centreG.X;
             return new FuncValue(s, Function);
         }
+
         private List<FuncValue> GlobalCompression(List<FuncValue> funcValues)
         {
             List<FuncValue> newFuncValues = new List<FuncValue>();
-            for(int i = 1; i < funcValues.Count; i++)
+            newFuncValues.Add(funcValues[0]);
+            for (int i = 1; i < funcValues.Count; i++)
             {
-                VectorM newVectX = new VectorM(funcValues[0].X + (funcValues[i].X - funcValues[0].X)/2);
+                VectorM newVectX = new VectorM(funcValues[0].X + (funcValues[i].X - funcValues[0].X) / 2);
                 newFuncValues.Add(new FuncValue(newVectX, Function));
             }
             return newFuncValues;
@@ -301,20 +281,17 @@ namespace Nelder_Mead
         {
             double sumY = 0;
             foreach (FuncValue funcValue in funcValues)
-            {
                 sumY += funcValue.Y;
-            }
-            double averageY = sumY/funcValues.Count;
+            double averageY = sumY / funcValues.Count;
 
             double buf = 0;
-            foreach(FuncValue funcValue in funcValues)
-            {
-                buf = (funcValue.Y - averageY)*(funcValue.Y - averageY);
-            }
-            return buf/(funcValues.Count);
+            foreach (FuncValue funcValue in funcValues)
+                buf += (funcValue.Y - averageY) * (funcValue.Y - averageY);
+
+            return buf / (funcValues.Count);
         }
 
     }
-
-    public delegate double Func(VectorM X);
 }
+
+public delegate double CalculationFunction(VectorM X);

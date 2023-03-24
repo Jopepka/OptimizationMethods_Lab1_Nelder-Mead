@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Vector
+﻿namespace Vector
 {
     public class VectorM
     {
@@ -53,7 +50,8 @@ namespace Vector
 
                 vector.Norm = Norm;
             }
-            else throw new RankException("Different length of vectors");
+            else
+                throw new RankException("Different length of vectors");
         }
 
         private double[] content;
@@ -83,7 +81,8 @@ namespace Vector
             {
                 for (int i = 0; i < vector.Size; i++)
                 {
-                    if (vector[i] != this[i]) return false;
+                    if (vector[i] != this[i])
+                        return false;
                 }
                 return true;
             }
@@ -107,7 +106,8 @@ namespace Vector
                 }
                 return vector;
             }
-            else throw new RankException("Different length of vectors");
+            else
+                throw new RankException("Different length of vectors");
         }
 
         public static VectorM operator -(VectorM vector1, VectorM vector2)
@@ -121,7 +121,8 @@ namespace Vector
                 }
                 return vector;
             }
-            else throw new RankException("Different length of vectors");
+            else
+                throw new RankException("Different length of vectors");
         }
 
         public static VectorM operator +(VectorM vector1, double number)
@@ -165,7 +166,8 @@ namespace Vector
                 }
                 return product;
             }
-            else throw new RankException("Different length of vectors");
+            else
+                throw new RankException("Different length of vectors");
         }
 
         public static VectorM operator *(VectorM vector1, double multiplier)
