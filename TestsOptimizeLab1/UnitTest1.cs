@@ -118,7 +118,7 @@ namespace TestsOptimizeLab1
             CalculationFunction calculate = someFunction.GetValue;
 
             Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
-            simplex = nm.ÑreatureSimplex(2);
+            simplex = nm.CreatureSimplex(2);
             nm.Fit(calculate, simplex);
 
             VectorM res1 = nm.Run();
@@ -143,7 +143,7 @@ namespace TestsOptimizeLab1
             CalculationFunction calculate = someFunction.GetValue;
 
             Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
-            simplex = nm.ÑreatureSimplex(2);
+            simplex = nm.CreatureSimplex(2);
             nm.Fit(calculate, simplex);
 
             VectorM res1 = nm.Run();
@@ -168,7 +168,7 @@ namespace TestsOptimizeLab1
             CalculationFunction calculate = someFunction.GetValue;
 
             Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
-            simplex = nm.ÑreatureSimplex(2, startVector: new VectorM(new double[] { -2.0, 3 }));
+            simplex = nm.CreatureSimplex(2, startVector: new VectorM(new double[] { -2.0, 3 }));
             nm.Fit(calculate, simplex);
 
             VectorM res1 = nm.Run();

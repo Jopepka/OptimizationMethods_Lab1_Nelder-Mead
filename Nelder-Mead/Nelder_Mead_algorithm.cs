@@ -57,7 +57,7 @@ namespace Nelder_Mead
             StartSimplex = startSimplex;
         }
 
-        public List<VectorM> ÑreatureSimplex(int dimension, double sizeSimplex = 1, VectorM? startVector = null)
+        public List<VectorM> CreatureSimplex(int dimension, double sizeSimplex = 1, VectorM? startVector = null)
         {
             VectorM? firstVectorSimplex = null;
             if (startVector is null)
