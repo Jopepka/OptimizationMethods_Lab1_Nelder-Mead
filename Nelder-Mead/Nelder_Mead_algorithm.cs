@@ -40,7 +40,7 @@ namespace Nelder_Mead
         public double Dispersion { get; private set; }
         public int Dimention { get; }
 
-        public Nelder_Mead_algorithm(double alfa, double betta, double gamma,
+        public Nelder_Mead_algorithm(double alfa = 1, double betta = 0.5, double gamma = 2,
             int maxSteps = 100, double? dispersion = null)
         {
             Alfa = alfa;
@@ -166,7 +166,7 @@ namespace Nelder_Mead
                         funcValues = GlobalCompression(funcValues);
                 }
 
-                if ((Dispersion = ProximityAssessment(funcValues)) < MinDispersion || steps >= MaxSteps)
+                if ((Dispersion = DispersionVectors(funcValues)) < MinDispersion || steps >= MaxSteps)
                     break;
             }
 
@@ -230,7 +230,7 @@ namespace Nelder_Mead
                     }
                 }
 
-                if ((Dispersion = ProximityAssessment(funcValues)) < MinDispersion || steps >= MaxSteps)
+                if ((Dispersion = DispersionVectors(funcValues)) < MinDispersion || steps >= MaxSteps)
                     break;
             } // while(true) end
             Steps = steps;
@@ -277,18 +277,20 @@ namespace Nelder_Mead
             return newFuncValues;
         }
 
-        private double ProximityAssessment(List<FuncValue> funcValues)
+        private double DispersionVectors(List<FuncValue> funcValues)
         {
-            double sumY = 0;
+            VectorM averageX = new VectorM(funcValues[0].X.Count);
             foreach (FuncValue funcValue in funcValues)
-                sumY += funcValue.Y;
-            double averageY = sumY / funcValues.Count;
+                averageX += funcValue.X;
+            averageX /= funcValues.Count;
 
-            double buf = 0;
+            double dispersion = 0;
             foreach (FuncValue funcValue in funcValues)
-                buf += (funcValue.Y - averageY) * (funcValue.Y - averageY);
-
-            return buf / (funcValues.Count);
+            {
+                dispersion += (funcValue.X - averageX) * (funcValue.X - averageX);
+            }
+            dispersion /= funcValues.Count;
+            return dispersion;
         }
 
     }
