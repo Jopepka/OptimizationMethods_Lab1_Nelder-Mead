@@ -8,12 +8,6 @@ namespace TestsOptimizeLab1
     public class UnitTest1
     {
         //Параметры для алгоритма Nelder-Mead
-        double alfa = 1;
-        double betta = 0.5;
-        double gamma = 2;
-        int dim = 2;
-        int maxStep = 100;
-        double dispersion = 0.001;
         List<VectorM> simplex;
 
 
@@ -32,6 +26,7 @@ namespace TestsOptimizeLab1
             return res;
         }
 
+        // Тестирование через ссылку на функцию
         [TestMethod]
         public void TestRes1()
         {
@@ -42,7 +37,7 @@ namespace TestsOptimizeLab1
                 new VectorM(new double[]{1, 1})
             };
 
-            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm(alfa, betta, gamma, maxSteps: maxStep);
+            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
             nm.Fit(funcTest, simplex);
 
             VectorM res1 = nm.Run();
@@ -56,10 +51,9 @@ namespace TestsOptimizeLab1
             trueResY = -21;
             Assert.IsTrue(Math.Abs(resY1 - trueResY) < accuracy);
             Assert.IsTrue(Math.Abs(resY2 - trueResY) < accuracy);
-            Assert.IsTrue(steps1 == maxStep);
-            Assert.IsTrue(steps2 == maxStep);
         }
 
+        //Тестирование через лямбда выражение
         [TestMethod]
         public void TestRes2()
         {
@@ -69,7 +63,7 @@ namespace TestsOptimizeLab1
                 new VectorM(new double[] {100})
             };
 
-            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm(alfa, betta, gamma, maxStep);
+            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
             nm.Fit(x => x * x, simplex);
 
             VectorM res1 = nm.Run();
@@ -83,12 +77,115 @@ namespace TestsOptimizeLab1
             trueResY = 0;
             Assert.IsTrue(Math.Abs(resY1 - trueResY) < accuracy);
             Assert.IsTrue(Math.Abs(resY2 - trueResY) < accuracy);
-            Assert.IsTrue(steps1 == maxStep);
-            Assert.IsTrue(steps2 == maxStep);
+        }
+
+        // Тестирование через класс SomeFunction, использующий 
+        // пакет AngouriMath  
+        [TestMethod]
+        public void TestRes3()
+        {
+            simplex = new List<VectorM>()
+            {
+                new VectorM(new double[]{-2}),
+                new VectorM(new double[]{100})
+            };
+
+            string str_func = "x^2";
+            SomeFunction someFunction = new SomeFunction(str_func, str_func);
+            CalculationFunction calculate = someFunction.GetValue;
+
+            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
+            nm.Fit(calculate, simplex);
+            VectorM res1 = nm.Run();
+            double resY1 = calculate(res1);
+            int steps1 = nm.Steps;
+
+            VectorM res2 = nm.RunV2();
+            double resY2 = calculate(res2);
+            int steps2 = nm.Steps;
+
+            trueResY = 0;
+            Assert.IsTrue(Math.Abs(resY1 - trueResY) < accuracy);
+            Assert.IsTrue(Math.Abs(resY2 - trueResY) < accuracy);
+        }
+
+        //Тестирование на функции Химмельблау
+        [TestMethod]
+        public void TestRes4()
+        {
+            string str_func = "(1 - x)^2 + 100(y - x^2)^2";
+            SomeFunction someFunction = new SomeFunction(str_func, str_func);
+            CalculationFunction calculate = someFunction.GetValue;
+
+            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
+            simplex = nm.СreatureSimplex(2);
+            nm.Fit(calculate, simplex);
+
+            VectorM res1 = nm.Run();
+            double resY1 = calculate(res1);
+            int steps1 = nm.Steps;
+
+            VectorM res2 = nm.RunV2();
+            double resY2 = calculate(res2);
+            int steps2 = nm.Steps;
+
+            trueResY = 0;
+            Assert.IsTrue(Math.Abs(resY1 - trueResY) < accuracy);
+            Assert.IsTrue(Math.Abs(resY2 - trueResY) < accuracy);
+        }
+
+        //Тестировании на функции Розенброка
+        [TestMethod]
+        public void TestRes5()
+        {
+            string str_func = "(x^2 + y - 11)^2 + (x + y^2 - 7)^2";
+            SomeFunction someFunction = new SomeFunction(str_func, str_func);
+            CalculationFunction calculate = someFunction.GetValue;
+
+            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
+            simplex = nm.СreatureSimplex(2);
+            nm.Fit(calculate, simplex);
+
+            VectorM res1 = nm.Run();
+            double resY1 = calculate(res1);
+            int steps1 = nm.Steps;
+
+            VectorM res2 = nm.RunV2();
+            double resY2 = calculate(res2);
+            int steps2 = nm.Steps;
+
+            trueResY = 0;
+            Assert.IsTrue(Math.Abs(resY1 - trueResY) < accuracy);
+            Assert.IsTrue(Math.Abs(resY2 - trueResY) < accuracy);
+        }
+
+        //Тестировании на функции Розенброка
+        [TestMethod]
+        public void TestRes6()
+        {
+            string str_func = "(x^2 + y - 11)^2 + (x + y^2 - 7)^2";
+            SomeFunction someFunction = new SomeFunction(str_func, str_func);
+            CalculationFunction calculate = someFunction.GetValue;
+
+            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
+            simplex = nm.СreatureSimplex(2, startVector: new VectorM(new double[] { -2.0, 3 }));
+            nm.Fit(calculate, simplex);
+
+            VectorM res1 = nm.Run();
+            double resY1 = calculate(res1);
+            int steps1 = nm.Steps;
+
+            VectorM res2 = nm.RunV2();
+            double resY2 = calculate(res2);
+            int steps2 = nm.Steps;
+
+            trueResY = 0;
+            Assert.IsTrue(Math.Abs(resY1 - trueResY) < accuracy);
+            Assert.IsTrue(Math.Abs(resY2 - trueResY) < accuracy);
         }
 
         [TestMethod]
-        public void TestRes3()
+        public void TestSteps1()
         {
             simplex = new List<VectorM>()
             {
@@ -98,23 +195,15 @@ namespace TestsOptimizeLab1
 
             string str_func = "x^2";
             SomeFunction someFunction = new SomeFunction(str_func, str_func);
-            CalculationFunction del = someFunction.GetValue;
+            CalculationFunction calculate = someFunction.GetValue;
 
-            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm(alfa, betta, gamma, maxStep);
-            nm.Fit(del, simplex);
-            VectorM res1 = nm.Run();
-            double resY1 = del(res1);
-            int steps1 = nm.Steps;
+            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
+            nm.Fit(calculate, simplex);
+            nm.Run();
+            Assert.AreEqual(nm.Steps, nm.MaxSteps);
 
-            VectorM res2 = nm.RunV2();
-            double resY2 = del(res2);
-            int steps2 = nm.Steps;
-
-            trueResY = 0;
-            Assert.IsTrue(Math.Abs(resY1 - trueResY) < accuracy);
-            Assert.IsTrue(Math.Abs(resY2 - trueResY) < accuracy);
-            Assert.IsTrue(steps1 == maxStep);
-            Assert.IsTrue(steps2 == maxStep);
+            nm.RunV2();
+            Assert.AreEqual(nm.Steps, nm.MaxSteps);
         }
     }
 }
