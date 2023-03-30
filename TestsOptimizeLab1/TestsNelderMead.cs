@@ -37,7 +37,7 @@ namespace TestsOptimizeLab1
                 new VectorM(new double[]{1, 1})
             };
 
-            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
+            NelderMead nm = new NelderMead();
             nm.Fit(funcTest, simplex);
 
             VectorM res1 = nm.Run();
@@ -63,7 +63,7 @@ namespace TestsOptimizeLab1
                 new VectorM(new double[] {100})
             };
 
-            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
+            NelderMead nm = new NelderMead();
             nm.Fit(x => x * x, simplex);
 
             VectorM res1 = nm.Run();
@@ -94,7 +94,7 @@ namespace TestsOptimizeLab1
             SomeFunction someFunction = new SomeFunction(str_func, str_func);
             CalculationFunction calculate = someFunction.GetValue;
 
-            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
+            NelderMead nm = new NelderMead();
             nm.Fit(calculate, simplex);
             VectorM res1 = nm.Run();
             double resY1 = calculate(res1);
@@ -117,7 +117,7 @@ namespace TestsOptimizeLab1
             SomeFunction someFunction = new SomeFunction(str_func, str_func);
             CalculationFunction calculate = someFunction.GetValue;
 
-            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
+            NelderMead nm = new NelderMead();
             simplex = nm.CreatureSimplex(2);
             nm.Fit(calculate, simplex);
 
@@ -142,7 +142,7 @@ namespace TestsOptimizeLab1
             SomeFunction someFunction = new SomeFunction(str_func, str_func);
             CalculationFunction calculate = someFunction.GetValue;
 
-            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
+            NelderMead nm = new NelderMead();
             simplex = nm.CreatureSimplex(2);
             nm.Fit(calculate, simplex);
 
@@ -167,7 +167,7 @@ namespace TestsOptimizeLab1
             SomeFunction someFunction = new SomeFunction(str_func, str_func);
             CalculationFunction calculate = someFunction.GetValue;
 
-            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
+            NelderMead nm = new NelderMead();
             simplex = nm.CreatureSimplex(2, startVector: new VectorM(new double[] { -2.0, 3 }));
             nm.Fit(calculate, simplex);
 
@@ -197,7 +197,7 @@ namespace TestsOptimizeLab1
             SomeFunction someFunction = new SomeFunction(str_func, str_func);
             CalculationFunction calculate = someFunction.GetValue;
 
-            Nelder_Mead_algorithm nm = new Nelder_Mead_algorithm();
+            NelderMead nm = new NelderMead();
             nm.Fit(calculate, simplex);
             nm.Run();
             Assert.AreEqual(nm.Steps, nm.MaxSteps);

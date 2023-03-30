@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Nelder-Mead\Nelder-Mead.csproj" />
-    <ProjectReference Include="..\OptimizationMethods_Lab1_Nelder-Mead\OptimizationMethods_Lab1_Nelder-Mead.csproj" />
+    <ProjectReference Include="..\Nelder-Mead\NelderMead.csproj" />
+    <ProjectReference Include="..\OptimizationMethods_Lab1_Nelder-Mead\WPFApp.csproj" />
     <ProjectReference Include="..\Vector\Vector.csproj" />
   </ItemGroup>
 
