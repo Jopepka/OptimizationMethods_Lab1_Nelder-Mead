@@ -92,7 +92,7 @@
         public double this[int index]
         {
             get => content[index];
-            set => content[index] = value;
+            private set => content[index] = value;
         }
 
         public static VectorM operator +(VectorM vector1, VectorM vector2)
