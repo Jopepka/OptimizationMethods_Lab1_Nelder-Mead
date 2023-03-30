@@ -5,7 +5,7 @@ using Vector;
 namespace TestsOptimizeLab1
 {
     [TestClass]
-    public class UnitTest1
+    public class TestsNelderMead
     {
         //ֿאנאלוענû הכÿ אכדמנטעלא Nelder-Mead
         List<VectorM> simplex;
