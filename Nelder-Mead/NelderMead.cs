@@ -5,7 +5,7 @@ using Vector;
 
 namespace Nelder_Mead
 {
-    public class Nelder_Mead_algorithm
+    public class NelderMead
     {
         public class FuncValue
         {
@@ -13,7 +13,6 @@ namespace Nelder_Mead
             {
                 this.Y = Y;
                 this.X = X;
-
                 this.func = func;
             }
 
@@ -24,7 +23,6 @@ namespace Nelder_Mead
 
             CalculationFunction? func { get; }
         }
-        //ѕараметры непосредственно вли€ющие на алгоритм
         public double Alfa { get; }
         public double Betta { get; }
         public double Gamma { get; }
@@ -32,15 +30,13 @@ namespace Nelder_Mead
         public double? MinDispersion { get; }
         public List<VectorM>? StartSimplex { get; private set; }
 
-        //‘ункци€ рассчета критери€
         public CalculationFunction Function { get; private set; }
 
-        //¬нутренние параметры
         public int Steps { get; private set; }
         public double Dispersion { get; private set; }
         public int Dimention { get; }
 
-        public Nelder_Mead_algorithm(double alfa = 1, double betta = 0.5, double gamma = 2,
+        public NelderMead(double alfa = 1, double betta = 0.5, double gamma = 2,
             int maxSteps = 100, double? dispersion = null)
         {
             Alfa = alfa;
@@ -61,26 +57,22 @@ namespace Nelder_Mead
         {
             VectorM? firstVectorSimplex = null;
             if (startVector is null)
-            {
                 firstVectorSimplex = new VectorM(dimension);
-            }
             else
             {
-                if (startVector.Size == dimension)
-                {
-                    firstVectorSimplex = startVector;
-                }
-                else
-                {
+                if (startVector.Size != dimension)
                     throw new ArgumentException($"dimension {dimension} and size startVector {startVector.Size} must be equal");
-                }
+                firstVectorSimplex = startVector;
             }
             List<VectorM> baseVectors = new List<VectorM>();
             for (int i = 0; i < dimension; i++)
             {
-                VectorM baseVector = new VectorM(dimension);
-                baseVector[i] += 1;
-                baseVectors.Add(baseVector);
+                double[] doublesForVect = new double[dimension];
+                for (int j = 0; j < dimension; j++)
+                    doublesForVect[j] = 0;
+                doublesForVect[i] = 1;
+
+                baseVectors.Add(new VectorM(doublesForVect));
             }
 
             List<VectorM> simplex = new List<VectorM> { firstVectorSimplex };
@@ -89,87 +81,60 @@ namespace Nelder_Mead
                 VectorM newVector = firstVectorSimplex + baseVectors[i] * sizeSimplex;
                 simplex.Add(newVector);
             }
+
             return simplex;
         }
 
         public VectorM? Run()
         {
             if (StartSimplex is null)
-            {
                 return null;
-            }
 
             List<FuncValue> funcValues = new List<FuncValue>() { };
-
             foreach (VectorM vector in StartSimplex)
-            {
                 funcValues.Add(new FuncValue(vector, Function));
-            }
 
             int steps = 0;
-            while (steps < MaxSteps)
+            while ((Dispersion = DispersionVectors(funcValues)) > MinDispersion || steps < MaxSteps)
             {
                 steps++;
 
                 funcValues.Sort((left, right) => left.Y.CompareTo(right.Y));
 
-                FuncValue
-                    best = funcValues[0],
-                    good = funcValues[funcValues.Count - 2],
-                    worst = funcValues[funcValues.Count - 1];
-
+                FuncValue best = funcValues[0];
+                FuncValue good = funcValues[funcValues.Count - 2];
+                FuncValue worst = funcValues[funcValues.Count - 1];
                 FuncValue centreG = CentreGravity(funcValues.GetRange(0, funcValues.Count - 1).Select(v => v.X).ToList());
-
                 FuncValue reflected = Reflection(worst, centreG);
 
-                int goStep = 6;
-                VectorM eVect;
                 if (reflected.Y < best.Y)
                 {
-                    eVect = (1 - Gamma) * centreG.X + Gamma * reflected.X;
+                    VectorM eVect = (1 - Gamma) * centreG.X + Gamma * reflected.X;
                     FuncValue e = new FuncValue(eVect, Function);
 
-                    if (e.Y < reflected.Y)
-                    {
-                        worst = e;
-                        goStep = 9;
-                    }
-                    if (reflected.Y < e.Y)
-                    {
-                        worst = reflected;
-                        goStep = 9;
-                    }
+                    worst = e.Y < reflected.Y ? e : reflected;
+                    funcValues[funcValues.Count - 1] = worst;
                 }
                 else if (good.Y < reflected.Y && reflected.Y < worst.Y)
                 {
                     worst = reflected;
-                    goStep = 9;
+                    funcValues[funcValues.Count - 1] = worst;
                 }
-                else if (good.Y < reflected.Y && reflected.Y < worst.Y)
+                else
                 {
-                    FuncValue bufToSwap = reflected;
-                    reflected = worst;
-                    worst = bufToSwap;
-                    goStep = 6;
-                }
-                else if (worst.Y < reflected.Y)
-                    goStep = 6;
-
-                funcValues[funcValues.Count - 1] = worst;
-
-                if (goStep == 6)
-                {
+                    if (good.Y < reflected.Y && reflected.Y < worst.Y)
+                    {
+                        FuncValue bufToSwap = reflected;
+                        reflected = worst;
+                        worst = bufToSwap;
+                    }
                     FuncValue s = Compression(funcValues.Last(), centreG);
-                    if (s.Y < funcValues.Last().Y)
-                        funcValues[funcValues.Count() - 1] = s;
-                    else if (s.Y > funcValues.Last().Y)
+                    if (s.Y < funcValues[^1].Y)
+                        funcValues[^1] = s;
+                    else if (s.Y > funcValues[^1].Y)
                         funcValues = GlobalCompression(funcValues);
                 }
-
-                if ((Dispersion = DispersionVectors(funcValues)) < MinDispersion || steps >= MaxSteps)
-                    break;
             }
-
             Steps = steps;
             return funcValues[0].X;
         }
@@ -180,58 +145,38 @@ namespace Nelder_Mead
                 return null;
 
             List<FuncValue> funcValues = new List<FuncValue>() { };
-
             foreach (VectorM vector in StartSimplex)
-            {
                 funcValues.Add(new FuncValue(vector, Function));
-            }
 
             int steps = 0;
-            while (true)
+            while ((Dispersion = DispersionVectors(funcValues)) > MinDispersion || steps < MaxSteps)
             {
                 steps++;
 
                 funcValues.Sort((left, right) => left.Y.CompareTo(right.Y));
 
-                FuncValue best = funcValues[0],
-                    good = funcValues[funcValues.Count - 2],
-                    worst = funcValues[funcValues.Count - 1];
-
+                FuncValue best = funcValues[0];
+                FuncValue good = funcValues[funcValues.Count - 2];
+                FuncValue worst = funcValues[funcValues.Count - 1];
                 FuncValue centreG = CentreGravity(funcValues.GetRange(0, funcValues.Count - 1).Select(v => v.X).ToList());
-
                 FuncValue reflected = Reflection(worst, centreG);
+
                 if (best.Y <= reflected.Y && reflected.Y < good.Y)
                     funcValues[funcValues.Count - 1] = reflected;
                 else if (reflected.Y < best.Y)
                 {
                     FuncValue expansion = Expansion(reflected, centreG);
-                    if (expansion.Y < reflected.Y)
-                        funcValues[funcValues.Count - 1] = expansion;
-                    else
-                        funcValues[funcValues.Count - 1] = reflected;
+                    funcValues[^1] = expansion.Y < reflected.Y ? expansion : reflected;
                 }
                 else
                 {
-                    if (reflected.Y < worst.Y)
-                    {
-                        FuncValue compress = Compression(reflected, centreG);
-                        if (compress.Y < reflected.Y)
-                            funcValues[funcValues.Count - 1] = compress;
-                        else
-                            funcValues = GlobalCompression(funcValues);
-                    }
-                    else if (reflected.Y >= worst.Y)
-                    {
-                        FuncValue compress = Compression(worst, centreG);
-                        if (compress.Y < worst.Y)
-                            funcValues[funcValues.Count - 1] = compress;
-                        else
-                            funcValues = GlobalCompression(funcValues);
-                    }
+                    FuncValue whoCompress = reflected.Y < worst.Y ? reflected : worst;
+                    FuncValue compress = Compression(whoCompress, centreG);
+                    if (compress.Y < whoCompress.Y)
+                        funcValues[^1] = compress;
+                    else
+                        funcValues = GlobalCompression(funcValues);
                 }
-
-                if ((Dispersion = DispersionVectors(funcValues)) < MinDispersion || steps >= MaxSteps)
-                    break;
             } // while(true) end
             Steps = steps;
             return funcValues[0].X;
