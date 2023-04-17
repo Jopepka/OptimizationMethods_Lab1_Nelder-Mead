@@ -7,17 +7,11 @@ namespace TestsOptimizeLab1
     [TestClass]
     public class TestsNelderMead
     {
-        //Параметры для алгоритма Nelder-Mead
         List<VectorM> simplex;
 
-
-        //Параметры для проверки:
-        //accuracy: Отклонение от верного ответа
-        //trueResY: Верный ответ
         IIterationNM iterationRu = new RunWikiRus();
         IIterationNM iterationEng = new RunWikiEng();
 
-        //Первая тестируема функция
         public double funcTest(VectorM vector)
         {
             double x = vector[0];
@@ -26,7 +20,6 @@ namespace TestsOptimizeLab1
             return res;
         }
 
-        // Тестирование через ссылку на функцию
         [TestMethod]
         public void TestRes1()
         {
@@ -54,7 +47,6 @@ namespace TestsOptimizeLab1
             Assert.AreEqual(trueResY, resY2, delta);
         }
 
-        //Тестирование через лямбда выражение
         [TestMethod]
         public void TestRes2()
         {
@@ -102,7 +94,7 @@ namespace TestsOptimizeLab1
             }
         }
 
-        public ResultationRun StartTest(string str_func, List<VectorM> simplex)
+        public ResultationRun StartTest(string str_func, List<VectorM> simplex, IDoSomefing doSomefing = null)
         {
             SomeFunction someFunction = new SomeFunction(str_func, str_func);
             CalculationFunction calculate = someFunction.GetValue;
@@ -110,8 +102,8 @@ namespace TestsOptimizeLab1
             NelderMead nm = new NelderMead();
             nm.Fit(calculate, simplex);
 
-            VectorM res1 = nm.Run(iterationRu);
-            VectorM res2 = nm.Run(iterationEng);
+            VectorM res1 = nm.Run(iterationRu, doSomefing);
+            VectorM res2 = nm.Run(iterationEng, doSomefing);
 
             return new ResultationRun(nm, simplex, res1, res2);
         }
@@ -197,6 +189,16 @@ namespace TestsOptimizeLab1
 
             Assert.AreEqual(ResRun.Nm.Steps, ResRun.Nm.MaxSteps);
             Assert.AreEqual(ResRun.Nm.Steps, ResRun.Nm.MaxSteps);
+        }
+
+        [TestMethod]
+        public void TestConsoleWrite()
+        {
+            string str_func = "(x^2 + y - 11)^2 + (x + y^2 - 7)^2";
+            simplex = NelderMead.CreatureSimplex(2, startVector: new VectorM(new double[] { -2.0, 3 }));
+            IDoSomefing printToConsole = new DoPrintConsole();
+
+            ResultationRun ResRun = StartTest(str_func, simplex, printToConsole);
         }
     }
 }
