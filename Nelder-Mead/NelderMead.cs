@@ -12,7 +12,6 @@ namespace Nelder_Mead
         public int MaxSteps { get; }
         public double? MinDispersion { get; }
         public List<VectorM>? StartSimplex { get; private set; }
-        public List<VectorM> NowSimplex { get; private set; }
 
         public CalculationFunction Function { get; private set; }
 
@@ -37,7 +36,7 @@ namespace Nelder_Mead
             StartSimplex = startSimplex;
         }
 
-        public VectorM? Run(IIterationNM algorithm)
+        public VectorM? Run(IIterationNM algorithm, IDoSomefing? doSomefing = null)
         {
             if (StartSimplex is null)
                 return null;
@@ -50,8 +49,13 @@ namespace Nelder_Mead
             while ((Dispersion = DispersionVectors(funcValues)) > MinDispersion || steps < MaxSteps)
             {
                 steps++;
+
+                if (doSomefing != null)
+                    doSomefing.Do(funcValues);
+
                 funcValues = algorithm.RunIteration(funcValues, this);
             }
+
             Steps = steps;
             return funcValues[0].X;
         }

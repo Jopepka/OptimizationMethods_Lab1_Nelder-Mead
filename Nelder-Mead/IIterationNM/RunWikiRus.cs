@@ -11,8 +11,8 @@ namespace Nelder_Mead
             funcValues.Sort((left, right) => left.Y.CompareTo(right.Y));
 
             FuncValue best = funcValues[0];
-            FuncValue good = funcValues[funcValues.Count - 2];
-            FuncValue worst = funcValues[funcValues.Count - 1];
+            FuncValue good = funcValues[^2];
+            FuncValue worst = funcValues[^1];
             FuncValue centreG = nm.CentreGravity(funcValues.GetRange(0, funcValues.Count - 1).Select(v => v.X).ToList());
             FuncValue reflected = nm.Reflection(worst, centreG);
 
