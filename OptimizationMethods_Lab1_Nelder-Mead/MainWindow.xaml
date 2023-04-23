@@ -5,8 +5,232 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:OptimizationMethods_Lab1_Nelder_Mead"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Nelder-Mead Algorithm" Height="450" Width="800" MinHeight="450" MinWidth="800">
     <Grid>
-        <Button>but</Button>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"></RowDefinition>
+            <RowDefinition Height="20*"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Menu>
+            <MenuItem Header="Settings">
+                <Separator/>
+                <MenuItem Header="Exit"/>
+            </MenuItem>
+
+            <MenuItem Header="Save">
+                <MenuItem Header="Save Gif"/>
+            </MenuItem>
+        </Menu>
+
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="3*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <ScrollViewer>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"></RowDefinition>
+                        <RowDefinition Height="auto"></RowDefinition>
+                        <RowDefinition Height="auto"></RowDefinition>
+                        <RowDefinition Height="auto"></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <GroupBox Header="Function">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock
+                                HorizontalAlignment="Left" 
+                                VerticalAlignment="Top"
+                                Text ="Function:"/>
+
+                            <TextBox
+                                x:Name="function_TextBox"
+                                Margin="1"
+                                TextWrapping="Wrap"/>
+
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Grid.Row="1" Header="Settings Algorithm">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition></ColumnDefinition>
+                                <ColumnDefinition></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Margin="1" Orientation="Vertical">
+                                <TextBlock
+                                    Text="Alfa"/>
+
+                                <TextBox
+                                    x:Name="alfa_TextBox"
+                                    Text="1"/>
+
+                                <TextBlock
+                                    Text="Betta"/>
+
+                                <TextBox
+                                    x:Name="betta_TextBox"
+                                    Text="0,5"/>
+
+                                <TextBlock
+                                    Text="Gamma"/>
+
+                                <TextBox
+                                    x:Name="gamma_TextBox"
+                                    Text="2"/>
+                            </StackPanel>
+
+                            <StackPanel Margin="1"  Grid.Column="1" Orientation="Vertical" DockPanel.Dock="Left">
+                                <TextBlock
+                                    Text="Max steps"/>
+
+                                <TextBox
+                                    x:Name="maxSteps_TextBox"
+                                    Text="100"/>
+
+                                <TextBlock
+                                    Text="Dispersion"/>
+
+                                <TextBox
+                                    x:Name="dispersion_TextBox"
+                                    Text="null"/>
+
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+                    
+                    <GroupBox Grid.Row="2" Header="Settings Simplex">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="1*"></RowDefinition>
+                                <RowDefinition Height="15*"></RowDefinition>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton
+                                    x:Name="Auto_RadioButton" 
+                                    GroupName="Select"
+                                    Content="Auto"
+                                    Checked="Auto_RadioButton_Checked"/>
+
+                                <RadioButton
+                                    x:Name="GenerateSimplex_RadioButton"
+                                    Margin="10, 0, 0, 0"
+                                    GroupName="Select"
+                                    Content="Generate"
+                                    Checked="GenerateSimplex_RadioButton_Checked"/>
+
+                                <RadioButton
+                                    Margin="10, 0, 0, 0"
+                                    GroupName="Select"
+                                    x:Name="Custom_RadioButton"
+                                    Content="Custom" 
+                                    Checked="Custom_RadioButton_Checked"/>
+                            </StackPanel>
+
+                            <TabControl Grid.Row="1">
+                                <TabItem Name="Auto_TabItem" Visibility="Collapsed">
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock
+                                            Text="The simplex will be created automatically with the starting point at zero"
+                                            TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </TabItem>
+
+                                <TabItem x:Name="Generate_TabItem" Visibility="Collapsed">
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock 
+                                            Text="Start Vector:"/>
+
+                                        <TextBox
+                                            x:Name="GenerateStartVector_TextBox"
+                                            Text="0 0"/>
+
+                                        <TextBlock
+                                        Text="Size Simplex:"/>
+
+                                        <TextBox
+                                            x:Name="GenerateSizeSimplex_TextBox"
+                                            Text="1"/>
+
+                                    </StackPanel>
+                                </TabItem>
+
+                                <TabItem x:Name="Custom_TabItem" Visibility="Collapsed">
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock
+                                            Text="Simplex:"/>
+
+                                        <TextBox
+                                            x:Name="CustomSimplex_TextBox"
+                                            TextWrapping="Wrap"
+                                            AcceptsReturn="True"/>
+
+                                    </StackPanel>
+                                </TabItem>
+                            </TabControl>
+                        </Grid>
+                    </GroupBox>
+
+                    <DockPanel Grid.Row="3">
+                        <Button 
+                            x:Name="StartAlgorithmRu_Button" 
+                            Style="{StaticResource fie}"
+                            DockPanel.Dock="Left"
+                            Margin="5"
+                            Content ="Start Ru algorithm" 
+                            Click="StartAlgorithmRu_Button_Click"/>
+
+                        <Button 
+                            x:Name="StartAlgorithmEng_Button" 
+                            Style="{StaticResource fie}"
+                            DockPanel.Dock="Right"
+                            Margin="5"
+                            Content ="Start Eng algorithm"
+                            Click="StartAlgorithmEng_Button_Click"/>
+
+                    </DockPanel>
+                </Grid>
+            </ScrollViewer>
+
+
+            <Grid Grid.Row="1" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="1*"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <WpfPlot x:Name="WpfPlot1" />
+
+                <GridSplitter 
+                    Grid.Row="1"
+                    Height="5"
+                    HorizontalAlignment="Stretch"/>
+                <DockPanel Grid.Row="2">
+                    <GroupBox Header="Log">
+                        <ScrollViewer>
+                            <TextBlock 
+                                x:Name="Log_TextBlock"
+                                TextWrapping="Wrap"
+                                Text="The text result of the algorithm will be displayed here"/>
+                        </ScrollViewer>
+                    </GroupBox>
+
+                    <GroupBox Header="Answer" DockPanel.Dock="Right">
+                        <ScrollViewer>
+                            <TextBlock
+                                x:Name="Answer_TextBlock"
+                                TextWrapping="Wrap"
+                                Text="Here will be the answer of the algorithm"/>
+                        </ScrollViewer>
+                    </GroupBox>
+                </DockPanel>
+            </Grid>
+
+        </Grid>
     </Grid>
 </Window>

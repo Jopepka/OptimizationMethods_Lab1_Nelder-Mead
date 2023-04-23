@@ -12,6 +12,7 @@ namespace OptimizationMethods_Lab1_Nelder_Mead
         public string Name { get; }
         public Entity Expr { get; }
         public Entity.Variable[] Variables { get; }
+        public int Dimention { get; }
         public FastExpression compl { get; }
 
         public SomeFunction(string function, string name)
@@ -21,6 +22,7 @@ namespace OptimizationMethods_Lab1_Nelder_Mead
 
             Expr = function;
             Variables = Expr.Vars.ToArray();
+            Dimention = Variables.Length;
             compl = Expr.Compile(Variables);
         }
 
