@@ -36,22 +36,23 @@ namespace Nelder_Mead
             StartSimplex = startSimplex;
         }
 
-        public VectorM? Run(IIterationNM algorithm, IDoSomefing? doSomefing = null)
+        public VectorM Run(IIterationNM algorithm, List<IDoSomefing>? doSomefings = null)
         {
             if (StartSimplex is null)
-                return null;
+                throw new ArgumentNullException("The simplex must not be null");
 
             List<FuncValue> funcValues = new List<FuncValue>() { };
             foreach (VectorM vector in StartSimplex)
                 funcValues.Add(new FuncValue(vector, Function));
 
             int steps = 0;
-            while ((Dispersion = DispersionVectors(funcValues)) > MinDispersion || steps < MaxSteps)
+            while (((Dispersion = DispersionVectors(funcValues)) > MinDispersion || MinDispersion == null) && steps < MaxSteps)
             {
                 steps++;
 
-                if (doSomefing != null)
-                    doSomefing.Do(funcValues);
+                if (doSomefings != null)
+                    foreach (IDoSomefing doSomefing in doSomefings)
+                        doSomefing.Do(funcValues);
 
                 funcValues = algorithm.RunIteration(funcValues, this);
             }
