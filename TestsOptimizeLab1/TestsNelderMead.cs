@@ -94,7 +94,7 @@ namespace TestsOptimizeLab1
             }
         }
 
-        public ResultationRun StartTest(string str_func, List<VectorM> simplex, IDoSomefing doSomefing = null)
+        public ResultationRun StartTest(string str_func, List<VectorM> simplex, List<IDoSomefing>? doSomefings = null)
         {
             SomeFunction someFunction = new SomeFunction(str_func, str_func);
             CalculationFunction calculate = someFunction.GetValue;
@@ -102,8 +102,8 @@ namespace TestsOptimizeLab1
             NelderMead nm = new NelderMead();
             nm.Fit(calculate, simplex);
 
-            VectorM res1 = nm.Run(iterationRu, doSomefing);
-            VectorM res2 = nm.Run(iterationEng, doSomefing);
+            VectorM res1 = nm.Run(iterationRu, doSomefings);
+            VectorM res2 = nm.Run(iterationEng, doSomefings);
 
             return new ResultationRun(nm, simplex, res1, res2);
         }
@@ -198,7 +198,7 @@ namespace TestsOptimizeLab1
             simplex = NelderMead.CreatureSimplex(2, startVector: new VectorM(new double[] { -2.0, 3 }));
             IDoSomefing printToConsole = new DoPrintConsole();
 
-            ResultationRun ResRun = StartTest(str_func, simplex, printToConsole);
+            ResultationRun ResRun = StartTest(str_func, simplex, new List<IDoSomefing> { printToConsole });
         }
     }
 }
