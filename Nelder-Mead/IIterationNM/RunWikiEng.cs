@@ -15,13 +15,13 @@ namespace Nelder_Mead
             FuncValue centreG = nm.CentreGravity(funcValues.GetRange(0, funcValues.Count - 1).Select(v => v.X).ToList());
             FuncValue reflected = nm.Reflection(worst, centreG);
 
-            if (best.Y <= reflected.Y && reflected.Y < good.Y)
-                funcValues[funcValues.Count - 1] = reflected;
-            else if (reflected.Y < best.Y)
+            if (reflected.Y < best.Y)
             {
                 FuncValue expansion = nm.Expansion(reflected, centreG);
                 funcValues[^1] = expansion.Y < reflected.Y ? expansion : reflected;
             }
+            else if (reflected.Y < good.Y)
+                funcValues[^1] = reflected;
             else
             {
                 FuncValue whoCompress = reflected.Y < worst.Y ? reflected : worst;
@@ -31,6 +31,7 @@ namespace Nelder_Mead
                 else
                     funcValues = nm.GlobalCompression(funcValues);
             }
+
             return funcValues;
         }
     }

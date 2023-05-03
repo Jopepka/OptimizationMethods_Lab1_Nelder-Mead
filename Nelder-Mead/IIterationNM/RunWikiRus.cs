@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Vector;
 
 namespace Nelder_Mead
 {
@@ -18,29 +17,18 @@ namespace Nelder_Mead
 
             if (reflected.Y < best.Y)
             {
-                VectorM eVect = (1 - nm.Gamma) * centreG.X + nm.Gamma * reflected.X;
-                FuncValue e = new FuncValue(eVect, nm.Function);
-
-                worst = e.Y < reflected.Y ? e : reflected;
-                funcValues[funcValues.Count - 1] = worst;
+                FuncValue expansion = nm.Expansion(reflected, centreG);
+                funcValues[^1] = expansion.Y < reflected.Y ? expansion : reflected;
             }
-            else if (good.Y < reflected.Y && reflected.Y < worst.Y)
-            {
-                worst = reflected;
-                funcValues[funcValues.Count - 1] = worst;
-            }
+            else if (reflected.Y < good.Y)
+                funcValues[^1] = reflected;
             else
             {
-                if (good.Y < reflected.Y && reflected.Y < worst.Y)
-                {
-                    FuncValue bufToSwap = reflected;
-                    reflected = worst;
-                    worst = bufToSwap;
-                }
-                FuncValue s = nm.Compression(funcValues.Last(), centreG);
-                if (s.Y < funcValues[^1].Y)
-                    funcValues[^1] = s;
-                else if (s.Y > funcValues[^1].Y)
+                FuncValue whoCompress = reflected.Y < worst.Y ? reflected : worst;
+                FuncValue compress = nm.Compression(whoCompress, centreG);
+                if (compress.Y < whoCompress.Y)
+                    funcValues[^1] = compress;
+                else
                     funcValues = nm.GlobalCompression(funcValues);
             }
 

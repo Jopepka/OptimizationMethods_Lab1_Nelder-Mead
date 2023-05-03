@@ -15,6 +15,6 @@ namespace Nelder_Mead
         public double Y { get; }
         public VectorM X { get; }
 
-        CalculationFunction? Func { get; }
+        CalculationFunction Func { get; }
     }
 }
