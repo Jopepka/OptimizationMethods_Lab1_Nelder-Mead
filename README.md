@@ -1,6 +1,5 @@
 # Метод Нелдера-Мида
-
-![image](https://user-images.githubusercontent.com/96999944/233848859-96027087-1ffc-43ce-ac4e-3d8039459a8c.png)
+![image](https://user-images.githubusercontent.com/96999944/236501239-c146fd41-6c1c-45ee-bb86-fb4dbce90cac.png)
 
 ## Описание
 Обучающий проект, реализующий метод [Нелдера-Мида](https://ru.wikipedia.org/wiki/Метод_Нелдера_—_Мида)
