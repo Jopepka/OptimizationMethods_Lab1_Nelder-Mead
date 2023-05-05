@@ -2,8 +2,26 @@
 
 namespace Nelder_Mead
 {
-    public interface IDoSomefing
+    public abstract class IDoSomefing
     {
-        public void Do(List<FuncValue> nowSimplex);
+        List<IDoSomefing> Actions = new List<IDoSomefing>();
+
+        public IDoSomefing()
+        {
+            Actions.Add(this);
+        }
+
+        public abstract void Do(Simplex nowSimplex);
+
+        public void Run(Simplex nowSimplex)
+        {
+            foreach (IDoSomefing action in Actions)
+                action.Do(nowSimplex);
+        }
+
+        public void AddAction(IDoSomefing action)
+        {
+            Actions.Add(action);
+        }
     }
 }

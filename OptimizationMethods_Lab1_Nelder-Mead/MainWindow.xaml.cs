@@ -16,29 +16,22 @@ namespace OptimizationMethods_Lab1_Nelder_Mead
     public partial class MainWindow : Window
     {
         NelderMead NM;
-        IIterationNM IterationNMRu;
-        IIterationNM IterationNMEng;
         double alfa = 1;
         double betta = 0.5;
         double gamma = 2;
         int maxSteps = 100;
         double? dispersion = null;
         CalculationFunction calculation;
-        List<VectorM> simplex;
+        Simplex simplex;
 
         SomeFunction function;
 
         DoPrintConsole doPrint = new DoPrintConsole();
 
-        VectorM resultationVector;
+        Pair resultationNelder;
         public MainWindow()
         {
             InitializeComponent();
-
-            IterationNMRu = new RunWikiRus();
-            IterationNMEng = new RunWikiEng();
-
-            simplex = NelderMead.CreatureSimplex(2);
 
             function_TextBox.Text = "(1 - x)^2 + 100(y - x^2)^2";
 
@@ -48,7 +41,7 @@ namespace OptimizationMethods_Lab1_Nelder_Mead
 
         }
 
-        private void StartAlgorithm(IIterationNM iteration)
+        private void StartAlgorithm()
         {
             try
             {
@@ -61,31 +54,31 @@ namespace OptimizationMethods_Lab1_Nelder_Mead
                     ApplyCustom();
                 else
                     ApplyGenerate();
+
+                try
+                {
+                    doPrint.ClearLog();
+
+                    NM = new NelderMead(maxSteps, dispersion);
+                    NM.SetSimplex(simplex);
+                    resultationNelder = NM.Run(doPrint);
+
+                    ChangeWindow();
+                }
+                catch (Exception e)
+                {
+                    string exeptionString;
+
+                    exeptionString = "An error occurred when the algorithm was running:\n";
+                    exeptionString += e.Message;
+                    exeptionString += "\nPerhaps the wrong dimension of the vectors for the function";
+
+                    ShowExeptionWindow(exeptionString);
+                }
             }
             catch (Exception e)
             {
                 ShowExeptionWindow("Error in algorithm settings:\n" + e.Message);
-            }
-
-            try
-            {
-                doPrint.ClearLog();
-
-                NM = new NelderMead(alfa, betta, gamma, maxSteps, dispersion);
-                NM.Fit(calculation, simplex);
-                resultationVector = NM.Run(iteration, new List<IDoSomefing> { doPrint });
-
-                ChangeWindow();
-            }
-            catch (Exception e)
-            {
-                string exeptionString;
-
-                exeptionString = "An error occurred when the algorithm was running:\n";
-                exeptionString += e.Message;
-                exeptionString += "\nPerhaps the wrong dimension of the vectors for the function";
-
-                ShowExeptionWindow(exeptionString);
             }
         }
 
@@ -98,27 +91,24 @@ namespace OptimizationMethods_Lab1_Nelder_Mead
         private string CreateResStr()
         {
             string ansResStr = "Algorithm Settings:";
-            ansResStr += "\nalfa = " + alfa.ToString();
-            ansResStr += "\nbetta = " + betta.ToString();
-            ansResStr += "\ngamma = " + gamma.ToString();
-            ansResStr += "\nMaxSteps = " + maxSteps.ToString();
-            ansResStr += "\nDispersion = " + dispersion.ToString();
+            ansResStr += "\nalfa = " + alfa;
+            ansResStr += "\nbetta = " + betta;
+            ansResStr += "\ngamma = " + gamma;
+            ansResStr += "\nMaxSteps = " + maxSteps;
+            ansResStr += "\nDispersion = " + dispersion;
 
             ansResStr += "\n\nStartSimplex:";
-            for (int i = 0; i < NM.StartSimplex.Count; i++)
-                ansResStr += $"\nV{i} = " + NM.StartSimplex[i];
+            for (int i = 0; i < NM.StartSimplex.pairs.Count; i++)
+                ansResStr += $"\nElement {i + 1}:\n" + NM.StartSimplex.pairs[i];
 
             ansResStr += "\n\nSteps taken:";
-            ansResStr += "\n" + NM.Steps.ToString();
+            ansResStr += "\n" + NM.Steps;
 
             ansResStr += "\n\nVariance of the simplex:";
-            ansResStr += "\n" + NM.Dispersion.ToString();
+            ansResStr += "\n" + NM.Dispersion;
 
-            ansResStr += "\n\nResultation vector: ";
-            ansResStr += "\n" + resultationVector;
-
-            ansResStr += "\n\nThe value of the criterion:";
-            ansResStr += "\n" + calculation(resultationVector).ToString();
+            ansResStr += "\n\n Resultation algorithm:";
+            ansResStr += "\n" + resultationNelder;
 
             return ansResStr;
         }
@@ -156,7 +146,7 @@ namespace OptimizationMethods_Lab1_Nelder_Mead
                 hm.YMax = sizeMap;
                 hm.Smooth = true;
 
-                WpfPlot1.Plot.AddPoint(resultationVector[0], resultationVector[1]);
+                WpfPlot1.Plot.AddPoint(resultationNelder.X[0], resultationNelder.X[1]);
             }
             else
                 WpfPlot1.Plot.Title("The graph can only be drawn for a two-dimensional function");
@@ -197,14 +187,9 @@ namespace OptimizationMethods_Lab1_Nelder_Mead
             }
         }
 
-        private void StartAlgorithmRu_Button_Click(object sender, RoutedEventArgs e)
+        private void StartAlgorithm_Button_Click(object sender, RoutedEventArgs e)
         {
-            StartAlgorithm(IterationNMRu);
-        }
-
-        private void StartAlgorithmEng_Button_Click(object sender, RoutedEventArgs e)
-        {
-            StartAlgorithm(IterationNMEng);
+            StartAlgorithm();
         }
 
         private void Auto_RadioButton_Checked(object sender, RoutedEventArgs e)
@@ -226,7 +211,7 @@ namespace OptimizationMethods_Lab1_Nelder_Mead
         {
             try
             {
-                simplex = NelderMead.CreatureSimplex(function.Dimention);
+                simplex = new Simplex(calculation, function.Dimention);
             }
             catch
             {
@@ -241,7 +226,7 @@ namespace OptimizationMethods_Lab1_Nelder_Mead
                 int dim = startVector.Size;
                 int sizeSimplex = Convert.ToInt32(GenerateSizeSimplex_TextBox.Text);
 
-                simplex = NelderMead.CreatureSimplex(dim, sizeSimplex, startVector);
+                simplex = new Simplex(calculation, dim, sizeSimplex, startVector);
             }
             catch
             {
@@ -255,7 +240,7 @@ namespace OptimizationMethods_Lab1_Nelder_Mead
             {
                 List<VectorM> simplex = CustomSimplex_TextBox.Text.Split('\n').Select(s => new VectorM(s.Split(' ').Select(Convert.ToDouble).ToArray())).ToList();
 
-                this.simplex = simplex;
+                this.simplex = new Simplex(calculation, simplex);
             }
             catch
             {

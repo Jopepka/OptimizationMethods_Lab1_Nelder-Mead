@@ -9,9 +9,6 @@ namespace TestsOptimizeLab1
     {
         List<VectorM> simplex;
 
-        IIterationNM iterationRu = new RunWikiRus();
-        IIterationNM iterationEng = new RunWikiEng();
-
         public double funcTest(VectorM vector)
         {
             double x = vector[0];
@@ -32,19 +29,14 @@ namespace TestsOptimizeLab1
 
             NelderMead nm = new NelderMead();
 
-            nm.Fit(funcTest, simplex);
+            nm.SetSimplex(new Simplex(funcTest, simplex));
 
-            VectorM res1 = nm.Run(iterationRu);
-            double resY1 = funcTest(res1);
-
-            VectorM res2 = nm.Run(iterationEng);
-            double resY2 = funcTest(res2);
+            Pair res = nm.Run();
 
             double trueResY = -21;
             double delta = 0.001;
 
-            Assert.AreEqual(trueResY, resY1, delta);
-            Assert.AreEqual(trueResY, resY2, delta);
+            Assert.AreEqual(trueResY, res.Y, delta);
         }
 
         [TestMethod]
@@ -57,121 +49,112 @@ namespace TestsOptimizeLab1
             };
 
             NelderMead nm = new NelderMead();
-            nm.Fit(x => x * x, simplex);
+            nm.SetSimplex(new Simplex(x => x * x, simplex));
 
-            VectorM res1 = nm.Run(iterationRu);
-            double resY1 = res1[0] * res1[0];
+            Pair res = nm.Run();
             int steps1 = nm.Steps;
-
-            VectorM res2 = nm.Run(iterationEng);
-            double resY2 = res2[0] * res2[0];
-            int steps2 = nm.Steps;
 
             double trueResY = 0;
             double delta = 0.001;
-            Assert.AreEqual(trueResY, resY1, delta);
-            Assert.AreEqual(trueResY, resY2, delta);
+            Assert.AreEqual(trueResY, res.Y, delta);
         }
 
-        public class ResultationRun
+        public class Resultation
         {
             public NelderMead Nm { get; }
-            public List<VectorM> StartSimplex { get; }
-            public VectorM X1 { get; }
-            public VectorM X2 { get; }
-            public double Y1 { get; }
-            public double Y2 { get; }
+            public Simplex _Simplex { get; }
+            public Pair _res { get; }
 
-            public ResultationRun(NelderMead nm, List<VectorM> startSimplex, VectorM x1, VectorM x2)
+            public Resultation(NelderMead nm, Simplex simplex, Pair res)
             {
                 Nm = nm;
-                StartSimplex = startSimplex;
-                X1 = x1;
-                X2 = x2;
-
-                Y1 = Nm.Function(X1);
-                Y2 = Nm.Function(X2);
+                _Simplex = simplex;
+                _res = res;
             }
         }
-
-        public ResultationRun StartTest(string str_func, List<VectorM> simplex, List<IDoSomefing>? doSomefings = null)
+        public Resultation StartTest(string str_func, List<VectorM>? vectorSimplex = null, double? dispersion = null, IDoSomefing? doSomefings = null)
         {
             SomeFunction someFunction = new SomeFunction(str_func, str_func);
             CalculationFunction calculate = someFunction.GetValue;
 
-            NelderMead nm = new NelderMead();
-            nm.Fit(calculate, simplex);
+            Simplex simplex = vectorSimplex is not null ?
+                new Simplex(calculate, vectorSimplex) :
+                new Simplex(calculate, 2);
+            NelderMead nm = new NelderMead(dispersion: dispersion);
+            nm.SetSimplex(simplex);
 
-            VectorM res1 = nm.Run(iterationRu, doSomefings);
-            VectorM res2 = nm.Run(iterationEng, doSomefings);
+            Pair res = nm.Run(doSomefings);
 
-            return new ResultationRun(nm, simplex, res1, res2);
+            return new Resultation(nm, simplex, res);
         }
 
         [TestMethod]
         public void TestRes3()
         {
             simplex = new List<VectorM>()
-            {
-                new VectorM(new double[]{-2}),
-                new VectorM(new double[]{100})
-            };
+                    {
+                        new VectorM(new double[]{-2}),
+                        new VectorM(new double[]{100})
+                    };
 
             string str_func = "x^2";
 
             double trueResY = 0;
             double delta = 0.001;
 
-            ResultationRun ResRun = StartTest(str_func, simplex);
+            Resultation resRun = StartTest(str_func, simplex);
 
-            Assert.AreEqual(trueResY, ResRun.Y1, delta);
-            Assert.AreEqual(trueResY, ResRun.Y2, delta);
+            Assert.AreEqual(trueResY, resRun._res.Y, delta);
         }
 
         [TestMethod]
         public void TestRes4()
         {
-            simplex = NelderMead.CreatureSimplex(2);
-
             string str_func = "(1 - x)^2 + 100(y - x^2)^2";
 
             double trueResY = 0;
             double delta = 0.001;
 
-            ResultationRun ResRun = StartTest(str_func, simplex);
+            Resultation resRun = StartTest(str_func);
 
-            Assert.AreEqual(trueResY, ResRun.Y1, delta);
-            Assert.AreEqual(trueResY, ResRun.Y2, delta);
+            Assert.AreEqual(trueResY, resRun._res.Y, delta);
         }
 
         [TestMethod]
         public void TestRes5()
         {
-            simplex = NelderMead.CreatureSimplex(2);
-
             string str_func = "(x^2 + y - 11)^2 + (x + y^2 - 7)^2";
 
             double trueResY = 0;
             double delta = 0.001;
 
-            ResultationRun ResRun = StartTest(str_func, simplex);
+            Resultation resRun = StartTest(str_func);
 
-            Assert.AreEqual(trueResY, ResRun.Y1, delta);
-            Assert.AreEqual(trueResY, ResRun.Y2, delta);
+            Assert.AreEqual(trueResY, resRun._res.Y, delta);
         }
 
         [TestMethod]
         public void TestRes6()
         {
             string str_func = "(x^2 + y - 11)^2 + (x + y^2 - 7)^2";
-            simplex = NelderMead.CreatureSimplex(2, startVector: new VectorM(new double[] { -2.0, 3 }));
+            //simplex = NelderMead.CreatureSimplex(2, startVector: new VectorM(new double[] { -2.0, 3 }));
             double trueResY = 0;
             double delta = 0.001;
 
-            ResultationRun ResRun = StartTest(str_func, simplex);
+            Resultation resRun = StartTest(str_func);
 
-            Assert.AreEqual(trueResY, ResRun.Y1, delta);
-            Assert.AreEqual(trueResY, ResRun.Y2, delta);
+            Assert.AreEqual(trueResY, resRun._res.Y, delta);
+        }
+
+        [TestMethod]
+        public void TestDispersion1()
+        {
+            string str_func = "(x^2 + y - 11)^2 + (x + y^2 - 7)^2";
+            double dispersion = 0.001;
+
+            Resultation resRun = StartTest(str_func, dispersion: dispersion);
+
+            Assert.IsTrue(dispersion >= resRun.Nm.Dispersion);
         }
 
         [TestMethod]
@@ -185,7 +168,7 @@ namespace TestsOptimizeLab1
 
             string str_func = "x^2";
 
-            ResultationRun ResRun = StartTest(str_func, simplex);
+            Resultation ResRun = StartTest(str_func, simplex);
 
             Assert.AreEqual(ResRun.Nm.Steps, ResRun.Nm.MaxSteps);
             Assert.AreEqual(ResRun.Nm.Steps, ResRun.Nm.MaxSteps);
@@ -195,10 +178,12 @@ namespace TestsOptimizeLab1
         public void TestConsoleWrite()
         {
             string str_func = "(x^2 + y - 11)^2 + (x + y^2 - 7)^2";
-            simplex = NelderMead.CreatureSimplex(2, startVector: new VectorM(new double[] { -2.0, 3 }));
-            IDoSomefing printToConsole = new DoPrintConsole();
+            DoPrintConsole printToConsole = new DoPrintConsole();
 
-            ResultationRun ResRun = StartTest(str_func, simplex, new List<IDoSomefing> { printToConsole });
+            Resultation ResRun = StartTest(str_func, doSomefings: printToConsole);
+
+            Assert.IsNotNull(printToConsole.Log);
+            Assert.AreNotEqual("", printToConsole.Log);
         }
     }
 }

@@ -175,24 +175,15 @@
                         </Grid>
                     </GroupBox>
 
-                    <DockPanel Grid.Row="3">
-                        <Button 
-                            x:Name="StartAlgorithmRu_Button" 
-                            Style="{StaticResource fie}"
-                            DockPanel.Dock="Left"
-                            Margin="5"
-                            Content ="Start Ru algorithm" 
-                            Click="StartAlgorithmRu_Button_Click"/>
+                    <Button 
+                        x:Name="StartAlgorithm_Button" 
+                        Grid.Row="3"
+                        Style="{StaticResource fie}"
+                        DockPanel.Dock="Left"
+                        Margin="5"
+                        Content ="Start algorithm" 
+                        Click="StartAlgorithm_Button_Click"/>
 
-                        <Button 
-                            x:Name="StartAlgorithmEng_Button" 
-                            Style="{StaticResource fie}"
-                            DockPanel.Dock="Right"
-                            Margin="5"
-                            Content ="Start Eng algorithm"
-                            Click="StartAlgorithmEng_Button_Click"/>
-
-                    </DockPanel>
                 </Grid>
             </ScrollViewer>
 
