@@ -33,16 +33,24 @@ namespace Nelder_Mead
         public CalculationFunction Calculation { get; }
         public List<Pair> pairs { get; private set; }
 
-        public Simplex(CalculationFunction function, List<VectorM> vectorsSimplex)
+        public Simplex(CalculationFunction function, List<VectorM> vectorsSimplex, double alfa = 1, double betta = 0.5, double gamma = 2)
         {
             Calculation = function;
+            Alfa = alfa;
+            Betta = betta;
+            Gamma = gamma;
+
             CreateSimplex(vectorsSimplex);
         }
 
         public Simplex(CalculationFunction function, int dimension, double sizeSimplex = 1,
-        VectorM? startVector = null)
+        VectorM? startVector = null, double alfa = 1, double betta = 0.5, double gamma = 2)
         {
             Calculation = function;
+            Alfa = alfa;
+            Betta = betta;
+            Gamma = gamma;
+
             CreateSimplex(dimension, sizeSimplex, startVector);
         }
 

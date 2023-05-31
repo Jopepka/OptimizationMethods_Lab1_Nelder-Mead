@@ -211,7 +211,7 @@ namespace OptimizationMethods_Lab1_Nelder_Mead
         {
             try
             {
-                simplex = new Simplex(calculation, function.Dimention);
+                simplex = new Simplex(calculation, function.Dimention, alfa: alfa, betta: betta, gamma: gamma);
             }
             catch
             {
@@ -226,7 +226,7 @@ namespace OptimizationMethods_Lab1_Nelder_Mead
                 int dim = startVector.Size;
                 int sizeSimplex = Convert.ToInt32(GenerateSizeSimplex_TextBox.Text);
 
-                simplex = new Simplex(calculation, dim, sizeSimplex, startVector);
+                simplex = new Simplex(calculation, dim, sizeSimplex, startVector, alfa, betta, gamma);
             }
             catch
             {
@@ -240,7 +240,7 @@ namespace OptimizationMethods_Lab1_Nelder_Mead
             {
                 List<VectorM> simplex = CustomSimplex_TextBox.Text.Split('\n').Select(s => new VectorM(s.Split(' ').Select(Convert.ToDouble).ToArray())).ToList();
 
-                this.simplex = new Simplex(calculation, simplex);
+                this.simplex = new Simplex(calculation, simplex, alfa, betta, gamma);
             }
             catch
             {
