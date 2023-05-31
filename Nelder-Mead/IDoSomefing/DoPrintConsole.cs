@@ -6,7 +6,7 @@ namespace Nelder_Mead
     public class DoPrintConsole : IDoSomefing
     {
         public string Log { get; private set; } = "";
-        public override void Do(Simplex nowSimplex)
+        public void Do(Simplex nowSimplex)
         {
 
             Log += "\n\nNow Simplex:";

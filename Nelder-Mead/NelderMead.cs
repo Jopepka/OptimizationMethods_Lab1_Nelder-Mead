@@ -36,7 +36,7 @@ namespace Nelder_Mead
             while (((Dispersion = simplex.Dispersion()) > MinDispersion || MinDispersion == null) && steps < MaxSteps)
             {
                 steps++;
-                doSomefings?.Run(simplex);
+                doSomefings?.Do(simplex);
                 simplex = RunIteration(simplex);
             }
 
